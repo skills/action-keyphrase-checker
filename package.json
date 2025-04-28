@@ -1,17 +1,15 @@
 {
-  "name": "typescript-action",
-  "description": "GitHub Actions TypeScript template",
-  "version": "0.0.0",
-  "author": "",
+  "name": "keyphrase-checker-action",
+  "description": "A GitHub Action that checks for the occurrence of a specified keyphrase.",
+  "author": "GitHub Skills",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/actions/typescript-action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/skills/action-keyphrase-checker.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/typescript-action/issues"
+    "url": "https://github.com/skills/action-keyphrase-checker/issues"
   },
   "keywords": [
     "actions"
