@@ -6,57 +6,210 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import { jest } from '@jest/globals'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import * as core from '../__fixtures__/core.js'
-import { wait } from '../__fixtures__/wait.js'
+
+// Create __dirname equivalent for ESM
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Mocks should be declared before the module being tested is imported.
 jest.unstable_mockModule('@actions/core', () => core)
-jest.unstable_mockModule('../src/wait.js', () => ({ wait }))
 
 // The module being tested should be imported dynamically. This ensures that the
 // mocks are used in place of any actual dependencies.
 const { run } = await import('../src/main.js')
 
-describe('main.ts', () => {
+describe('Keyphrase Checker Action', () => {
   beforeEach(() => {
-    // Set the action's inputs as return values from core.getInput().
-    core.getInput.mockImplementation(() => '500')
-
-    // Mock the wait function so that it does not actually wait.
-    wait.mockImplementation(() => Promise.resolve('done!'))
+    // Clear all mocks before each test
+    jest.clearAllMocks()
   })
 
-  afterEach(() => {
-    jest.resetAllMocks()
-  })
+  test('passes when text file has enough occurrences', async () => {
+    // Get the path to the test file
+    const testFilePath = path.join(__dirname, 'test-two-occurrences.md')
 
-  it('Sets the time output', async () => {
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text-file':
+          return testFilePath
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '2'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
+
+    // Run the action
     await run()
 
-    // Verify the time output was set.
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      // Simple regex to match a time string in the format HH:MM:SS.
-      expect.stringMatching(/^\d{2}:\d{2}:\d{2}/)
+    // Check expectations
+    expect(core.setOutput).toHaveBeenCalledWith('occurrences', 2)
+    expect(core.setFailed).not.toHaveBeenCalled()
+  })
+
+  test('fails when text file has fewer occurrences than required', async () => {
+    // Get the path to the test file
+    const testFilePath = path.join(__dirname, 'test-two-occurrences.md')
+
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text-file':
+          return testFilePath
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '3'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
+
+    // Run the action
+    await run()
+
+    // Check expectations
+    expect(core.setOutput).toHaveBeenCalledWith('occurrences', 2)
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Expected at least 3 occurrences of "GitHub", but found only 2'
     )
   })
 
-  it('Sets a failed status', async () => {
-    // Clear the getInput mock and return an invalid value.
-    core.getInput.mockClear().mockReturnValueOnce('this is not a number')
+  test('passes with direct text input having enough occurrences', async () => {
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text':
+          return "Hey @professortocat, I'm finished with my task"
+        case 'keyphrase':
+          return 'professortocat'
+        case 'minimum-occurrences':
+          return '1'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
 
-    // Clear the wait mock and return a rejected promise.
-    wait
-      .mockClear()
-      .mockRejectedValueOnce(new Error('milliseconds is not a number'))
-
+    // Run the action
     await run()
 
-    // Verify that the action was marked as failed.
-    expect(core.setFailed).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds is not a number'
+    // Check expectations
+    expect(core.setOutput).toHaveBeenCalledWith('occurrences', 1)
+    expect(core.setFailed).not.toHaveBeenCalled()
+  })
+
+  test('handles case-insensitive search correctly', async () => {
+    // Get the path to the test file with mixed case occurrences
+    const testFilePath = path.join(__dirname, 'test-mixed-case.md')
+
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text-file':
+          return testFilePath
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '3'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(false)
+
+    // Run the action
+    await run()
+
+    // Check expectations
+    expect(core.setOutput).toHaveBeenCalledWith('occurrences', 3)
+    expect(core.setFailed).not.toHaveBeenCalled()
+  })
+
+  test('fails when file does not exist', async () => {
+    const nonExistentFilePath = path.join(__dirname, 'non-existent.md')
+
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text-file':
+          return nonExistentFilePath
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '1'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
+
+    // Run the action
+    await run()
+
+    // Check expectations
+    expect(core.setFailed).toHaveBeenCalledWith(
+      `File does not exist: ${nonExistentFilePath}`
+    )
+  })
+
+  test('fails when neither text nor text-file is provided', async () => {
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '1'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
+
+    // Run the action
+    await run()
+
+    // Check expectations
+    expect(core.setFailed).toHaveBeenCalledWith(
+      "Exactly one of 'text-file' or 'text' inputs must be provided"
+    )
+  })
+
+  test('fails when both text and text-file are provided', async () => {
+    const testFilePath = path.join(__dirname, 'test-two-occurrences.md')
+
+    // Setup mocks
+    core.getInput.mockImplementation((name) => {
+      switch (name) {
+        case 'text-file':
+          return testFilePath
+        case 'text':
+          return 'Some text'
+        case 'keyphrase':
+          return 'GitHub'
+        case 'minimum-occurrences':
+          return '1'
+        default:
+          return ''
+      }
+    })
+    core.getBooleanInput.mockReturnValue(true)
+
+    // Run the action
+    await run()
+
+    // Check expectations
+    expect(core.setFailed).toHaveBeenCalledWith(
+      "Exactly one of 'text-file' or 'text' inputs must be provided"
     )
   })
 })

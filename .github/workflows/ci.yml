@@ -44,21 +44,73 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
-  test-action:
-    name: GitHub Actions Test
+  positive-tests:
+    name: Positive Action Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v4
 
-      - name: Test Local Action
-        id: test-action
+      - name: Test direct text (not case-sensitive)
+        id: test-direct-text
         uses: ./
         with:
-          milliseconds: 2000
+          text: "Hey @PrOfEssortocat, I'm finished with my task"
+          keyphrase: "@professortocat"
 
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+      - name: Test text file (not case-sensitive)
+        id: test-text-file
+        uses: ./
+        with:
+          text-file: ./__tests__/test-mixed-case.md
+          keyphrase: "github"
+          minimum-occurrences: "3"
+
+  negative-tests:
+    name: Negative Action Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test direct text (case-sensitive)
+        id: test-direct-text
+        continue-on-error: true
+        uses: ./
+        with:
+          text: "Hey @PrOfEssortocat, I'm finished with my task"
+          keyphrase: "@professortocat"
+          case-sensitive: true
+
+      - name: Check output for direct text test
+        run: |
+          if [[ "${{ steps.test-direct-text.outcome }}" != "failure" ]]; then
+            echo "Expected the test to fail but it passed"
+            exit 1
+          fi
+          if [[ "${{ steps.test-direct-text.outputs.occurrences }}" != "0" ]]; then
+            echo "Expected 0 occurrences but found ${{ steps.test-direct-text.outputs.occurrences }}"
+            exit 1
+          fi
+
+      - name: Test text file (case-sensitive)
+        id: test-text-file
+        continue-on-error: true
+        uses: ./
+        with:
+          text-file: ./__tests__/test-mixed-case.md
+          keyphrase: "github"
+          minimum-occurrences: 3
+          case-sensitive: true
+
+      - name: Check output for text file test
+        run: |
+          if [[ "${{ steps.test-text-file.outcome }}" != "failure" ]]; then
+            echo "Expected the test to fail but it passed"
+            exit 1
+          fi
+          if [[ "${{ steps.test-text-file.outputs.occurrences }}" != "1" ]]; then
+            echo "Expected 1 occurrences but found ${{ steps.test-text-file.outputs.occurrences }}"
+            exit 1
+          fi
+
+
+

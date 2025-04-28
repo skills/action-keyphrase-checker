@@ -1,24 +1,31 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: 'Keyphrase Checker'
+description:
+  'Checks for the presence of a specific phrase in text content or a file'
+author: 'GitHub Skills'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
-branding:
-  icon: heart
-  color: red
-
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  text-file:
+    description: 'Path to a file containing text to check'
+    required: false
+  text:
+    description: 'Direct text input to check'
+    required: false
+  keyphrase:
+    description: 'The phrase to search for in the text'
     required: true
-    default: '1000'
+  case-sensitive:
+    description: 'Whether to perform case-sensitive matching'
+    required: true
+    default: 'false'
+  minimum-occurrences:
+    description: 'Minimum number of occurrences required for success'
+    required: true
+    default: '1'
 
-# Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  occurrences:
+    description: 'Number of occurrences of the keyphrase found in the text'
 
 runs:
-  using: node20
-  main: dist/index.js
+  using: 'node20'
+  main: 'dist/index.js'
