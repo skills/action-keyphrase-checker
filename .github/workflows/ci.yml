@@ -56,15 +56,15 @@ jobs:
         uses: ./
         with:
           text: "Hey @PrOfEssortocat, I'm finished with my task"
-          keyphrase: "@professortocat"
+          keyphrase: '@professortocat'
 
       - name: Test text file (not case-sensitive)
         id: test-text-file
         uses: ./
         with:
           text-file: ./__tests__/test-mixed-case.md
-          keyphrase: "github"
-          minimum-occurrences: "3"
+          keyphrase: 'github'
+          minimum-occurrences: '3'
 
   negative-tests:
     name: Negative Action Tests
@@ -77,7 +77,7 @@ jobs:
         uses: ./
         with:
           text: "Hey @PrOfEssortocat, I'm finished with my task"
-          keyphrase: "@professortocat"
+          keyphrase: '@professortocat'
           case-sensitive: true
 
       - name: Check output for direct text test
@@ -97,7 +97,7 @@ jobs:
         uses: ./
         with:
           text-file: ./__tests__/test-mixed-case.md
-          keyphrase: "github"
+          keyphrase: 'github'
           minimum-occurrences: 3
           case-sensitive: true
 
@@ -111,6 +111,3 @@ jobs:
             echo "Expected 1 occurrences but found ${{ steps.test-text-file.outputs.occurrences }}"
             exit 1
           fi
-
-
-
