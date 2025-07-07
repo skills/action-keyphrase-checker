@@ -27260,6 +27260,16 @@ async function run() {
             required: true
         });
         const minimumOccurrences = parseInt(coreExports.getInput('minimum-occurrences', { required: true }));
+        const maximumOccurrencesInput = coreExports.getInput('maximum-occurrences', { required: false });
+        const maximumOccurrences = maximumOccurrencesInput
+            ? parseInt(maximumOccurrencesInput)
+            : null;
+        // Validate parameter consistency
+        if (maximumOccurrences !== null &&
+            maximumOccurrences < minimumOccurrences) {
+            coreExports.setFailed(`Invalid configuration: maximum-occurrences (${maximumOccurrences}) must be greater than or equal to minimum-occurrences (${minimumOccurrences})`);
+            return;
+        }
         // Check that exactly one of text or textFile is provided
         if ((!textFile && !text) || (textFile && text)) {
             coreExports.setFailed("Exactly one of 'text-file' or 'text' inputs must be provided");
@@ -27289,12 +27299,26 @@ async function run() {
         coreExports.setOutput('occurrences', occurrences);
         // Log the results for easier debugging
         coreExports.info(`Found ${occurrences} occurrences of "${keyphrase}" ${caseSensitive ? '(case-sensitive)' : '(case-insensitive)'} in ${textFile || 'provided text'}`);
-        // Check if the minimum requirement is met
+        // Check occurrence requirements
+        let validationFailed = false;
+        // Check minimum requirement
         if (occurrences < minimumOccurrences) {
             coreExports.setFailed(`Expected at least ${minimumOccurrences} occurrences of "${keyphrase}", but found only ${occurrences}`);
+            validationFailed = true;
         }
-        else {
-            coreExports.info(`✅ Success! Found ${occurrences} occurrences (minimum required: ${minimumOccurrences})`);
+        // Check maximum requirement
+        if (maximumOccurrences !== null && occurrences > maximumOccurrences) {
+            coreExports.setFailed(`Expected at most ${maximumOccurrences} occurrences of "${keyphrase}", but found ${occurrences}`);
+            validationFailed = true;
+        }
+        // Success message
+        if (!validationFailed) {
+            let successMessage = `✅ Success! Found ${occurrences} occurrences (minimum required: ${minimumOccurrences}`;
+            if (maximumOccurrences !== null) {
+                successMessage += `, maximum allowed: ${maximumOccurrences}`;
+            }
+            successMessage += ')';
+            coreExports.info(successMessage);
         }
     }
     catch (error) {

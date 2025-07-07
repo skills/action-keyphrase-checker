@@ -16,6 +16,24 @@ async function run(): Promise<void> {
     const minimumOccurrences: number = parseInt(
       core.getInput('minimum-occurrences', { required: true })
     )
+    const maximumOccurrencesInput: string = core.getInput(
+      'maximum-occurrences',
+      { required: false }
+    )
+    const maximumOccurrences: number | null = maximumOccurrencesInput
+      ? parseInt(maximumOccurrencesInput)
+      : null
+
+    // Validate parameter consistency
+    if (
+      maximumOccurrences !== null &&
+      maximumOccurrences < minimumOccurrences
+    ) {
+      core.setFailed(
+        `Invalid configuration: maximum-occurrences (${maximumOccurrences}) must be greater than or equal to minimum-occurrences (${minimumOccurrences})`
+      )
+      return
+    }
 
     // Check that exactly one of text or textFile is provided
     if ((!textFile && !text) || (textFile && text)) {
@@ -58,15 +76,33 @@ async function run(): Promise<void> {
       } in ${textFile || 'provided text'}`
     )
 
-    // Check if the minimum requirement is met
+    // Check occurrence requirements
+    let validationFailed = false
+
+    // Check minimum requirement
     if (occurrences < minimumOccurrences) {
       core.setFailed(
         `Expected at least ${minimumOccurrences} occurrences of "${keyphrase}", but found only ${occurrences}`
       )
-    } else {
-      core.info(
-        `✅ Success! Found ${occurrences} occurrences (minimum required: ${minimumOccurrences})`
+      validationFailed = true
+    }
+
+    // Check maximum requirement
+    if (maximumOccurrences !== null && occurrences > maximumOccurrences) {
+      core.setFailed(
+        `Expected at most ${maximumOccurrences} occurrences of "${keyphrase}", but found ${occurrences}`
       )
+      validationFailed = true
+    }
+
+    // Success message
+    if (!validationFailed) {
+      let successMessage = `✅ Success! Found ${occurrences} occurrences (minimum required: ${minimumOccurrences}`
+      if (maximumOccurrences !== null) {
+        successMessage += `, maximum allowed: ${maximumOccurrences}`
+      }
+      successMessage += ')'
+      core.info(successMessage)
     }
   } catch (error) {
     // Handle any uncaught errors

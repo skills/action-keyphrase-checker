@@ -38,6 +38,47 @@ steps:
       minimum-occurrences: 2
 ```
 
+### Check Maximum Occurrences
+
+```yaml
+steps:
+  - name: Check keyphrase doesn't appear too often
+    id: keyphrase-check
+    uses: skills/action-keyphrase-checker@v1
+    with:
+      text-file: 'docs/content.md'
+      keyphrase: 'amazing'
+      maximum-occurrences: 3
+```
+
+### Range Validation (Both Min and Max)
+
+```yaml
+steps:
+  - name: Check keyphrase appears in acceptable range
+    id: keyphrase-check
+    uses: skills/action-keyphrase-checker@v1
+    with:
+      text-file: 'docs/content.md'
+      keyphrase: 'GitHub'
+      minimum-occurrences: 2
+      maximum-occurrences: 5
+```
+
+### Exact Occurrences Check
+
+```yaml
+steps:
+  - name: Check for exact number of occurrences
+    id: keyphrase-check
+    uses: skills/action-keyphrase-checker@v1
+    with:
+      text-file: 'docs/content.md'
+      keyphrase: 'TODO'
+      minimum-occurrences: 0
+      maximum-occurrences: 0
+```
+
 ## Inputs ⚙️
 
 | Input                 | Description                                        | Required | Default |
@@ -47,6 +88,7 @@ steps:
 | `keyphrase`           | The phrase to search for in the text               | Yes      | -       |
 | `case-sensitive`      | Whether to perform case-sensitive matching         | No       | `false` |
 | `minimum-occurrences` | Minimum number of occurrences required for success | No       | `1`     |
+| `maximum-occurrences` | Maximum number of keyphrase occurrences allowed    | No       | -       |
 
 > \*Note: You must provide exactly one of `text-file` or `text`.
 
