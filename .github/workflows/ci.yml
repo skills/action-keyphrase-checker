@@ -74,6 +74,15 @@ jobs:
           keyphrase: 'github'
           maximum-occurrences: '3'
 
+      - name: Test exact occurrences (positive case)
+        id: test-exact-occurrences-positive
+        uses: ./
+        with:
+          text-file: ./__tests__/test-two-occurrences.md
+          keyphrase: 'github'
+          minimum-occurrences: '2'
+          maximum-occurrences: '2'
+
   negative-tests:
     name: Negative Action Tests
     runs-on: ubuntu-latest
