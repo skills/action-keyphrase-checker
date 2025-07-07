@@ -21,6 +21,9 @@ inputs:
     description: 'Minimum number of occurrences required for success'
     required: true
     default: '1'
+  maximum-occurrences:
+    description: 'Maximum number of keyphrase occurrences allowed'
+    required: false
 
 outputs:
   occurrences:

@@ -66,6 +66,23 @@ jobs:
           keyphrase: 'github'
           minimum-occurrences: '3'
 
+      - name: Test maximum-occurrences (positive case)
+        id: test-max-occurrences-positive
+        uses: ./
+        with:
+          text-file: ./__tests__/test-two-occurrences.md
+          keyphrase: 'github'
+          maximum-occurrences: '3'
+
+      - name: Test exact occurrences (positive case)
+        id: test-exact-occurrences-positive
+        uses: ./
+        with:
+          text-file: ./__tests__/test-two-occurrences.md
+          keyphrase: 'github'
+          minimum-occurrences: '2'
+          maximum-occurrences: '2'
+
   negative-tests:
     name: Negative Action Tests
     runs-on: ubuntu-latest
@@ -109,5 +126,25 @@ jobs:
           fi
           if [[ "${{ steps.test-text-file.outputs.occurrences }}" != "1" ]]; then
             echo "Expected 1 occurrences but found ${{ steps.test-text-file.outputs.occurrences }}"
+            exit 1
+          fi
+
+      - name: Test maximum-occurrences (negative case)
+        id: test-max-occurrences-negative
+        continue-on-error: true
+        uses: ./
+        with:
+          text-file: ./__tests__/test-mixed-case.md
+          keyphrase: 'github'
+          maximum-occurrences: '2'
+
+      - name: Check output for maximum-occurrences test
+        run: |
+          if [[ "${{ steps.test-max-occurrences-negative.outcome }}" != "failure" ]]; then
+            echo "Expected the test to fail but it passed"
+            exit 1
+          fi
+          if [[ "${{ steps.test-max-occurrences-negative.outputs.occurrences }}" != "3" ]]; then
+            echo "Expected 3 occurrences but found ${{ steps.test-max-occurrences-negative.outputs.occurrences }}"
             exit 1
           fi
