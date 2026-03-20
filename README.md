@@ -15,7 +15,7 @@ appears a minimum number of times with options for case sensitivity.
 steps:
   - name: Check for required phrase in file
     id: keyphrase-check
-    uses: skills/action-keyphrase-checker@v1
+    uses: skills/action-keyphrase-checker@v2
     with:
       text-file: 'path/to/file.md'
       keyphrase: 'GitHub'
@@ -29,10 +29,10 @@ steps:
 steps:
   - name: Check direct text content
     id: keyphrase-check
-    uses: skills/action-keyphrase-checker@v1
+    uses: skills/action-keyphrase-checker@v2
     with:
       text: |
-        Some text mentioning GitHub Actions and more GitHub Actions conten
+        Some text mentioning GitHub Actions and more GitHub Actions content.
       keyphrase: 'GitHub Actions'
       case-sensitive: true
       minimum-occurrences: 2
@@ -44,7 +44,7 @@ steps:
 steps:
   - name: Check keyphrase doesn't appear too often
     id: keyphrase-check
-    uses: skills/action-keyphrase-checker@v1
+    uses: skills/action-keyphrase-checker@v2
     with:
       text-file: 'docs/content.md'
       keyphrase: 'amazing'
@@ -57,7 +57,7 @@ steps:
 steps:
   - name: Check keyphrase appears in acceptable range
     id: keyphrase-check
-    uses: skills/action-keyphrase-checker@v1
+    uses: skills/action-keyphrase-checker@v2
     with:
       text-file: 'docs/content.md'
       keyphrase: 'GitHub'
@@ -71,7 +71,7 @@ steps:
 steps:
   - name: Check for exact number of occurrences
     id: keyphrase-check
-    uses: skills/action-keyphrase-checker@v1
+    uses: skills/action-keyphrase-checker@v2
     with:
       text-file: 'docs/content.md'
       keyphrase: 'TODO'
