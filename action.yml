@@ -30,5 +30,5 @@ outputs:
     description: 'Number of occurrences of the keyphrase found in the text'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
