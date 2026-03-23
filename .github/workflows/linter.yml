@@ -21,13 +21,13 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
@@ -53,3 +53,6 @@ jobs:
           VALIDATE_TYPESCRIPT_STANDARD: false
           VALIDATE_NATURAL_LANGUAGE: false
           VALIDATE_ENV: false
+          VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
+          VALIDATE_BIOME_LINT: false
+          VALIDATE_BIOME_FORMAT: false
